@@ -1,0 +1,281 @@
+@import "tailwindcss";
+@import "maplibre-gl/dist/maplibre-gl.css";
+
+/* next-themes writes class="dark" onto <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Semantic color tokens.
+ *
+ * These MUST live here as plain custom properties (not inside `@theme`) —
+ * Tailwind v4 inlines `@theme` values statically into the generated utility,
+ * so a value declared there cannot react to `.dark`. The `@theme inline` block
+ * below bridges them, making utilities emit `var(--x)` instead of a literal.
+ *
+ * JS consumers that Tailwind cannot reach (Recharts props, MapLibre styles)
+ * read the same palette from src/lib/theme.ts — keep the two in sync.
+ */
+:root {
+  color-scheme: light;
+
+  --bg: #f6f8fb;
+  --surface: #ffffff;
+  --surface-2: #eef2f7;
+  --surface-3: #e2e8f0;
+  --overlay: rgb(255 255 255 / 0.82);
+
+  --border: #d8e0ea;
+  --border-strong: #b6c3d4;
+
+  --fg: #0b1a2b;
+  --fg-muted: #4a5b70;
+  --fg-subtle: #64748b;
+
+  --accent: #0e7490;
+  --accent-soft: rgb(14 116 144 / 0.1);
+  --success: #047857;
+  --warning: #b45309;
+  --danger: #dc2626;
+  --neutral: #64748b;
+
+  --chart-grid: #e2e8f0;
+  --chart-axis: #64748b;
+
+  --grid-line: rgb(14 116 144 / 0.05);
+  --panel-shadow: 0 1px 3px rgb(11 26 43 / 0.08), 0 8px 24px rgb(11 26 43 / 0.04);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --bg: #020d18;
+  --surface: #0a1628;
+  --surface-2: #0f1f35;
+  --surface-3: #16283f;
+  --overlay: rgb(10 22 40 / 0.7);
+
+  --border: #1e3254;
+  --border-strong: #2d4a6e;
+
+  --fg: #e2e8f0;
+  --fg-muted: #94a3b8;
+  /* Was #475569, which sat at 2.39:1 on --surface — below AA for any text.
+     #7689a3 keeps the de-emphasised feel at 5.07:1. */
+  --fg-subtle: #7689a3;
+
+  --accent: #22d3ee;
+  --accent-soft: rgb(34 211 238 / 0.1);
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --neutral: #94a3b8;
+
+  --chart-grid: #1e293b;
+  --chart-axis: #64748b;
+
+  --grid-line: rgb(34 211 238 / 0.018);
+  --panel-shadow: 0 0 30px rgb(0 0 0 / 0.5);
+}
+
+@theme inline {
+  /* --font-inter / --font-jetbrains are injected by next/font in layout.tsx */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), "Fira Code", ui-monospace, monospace;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-overlay: var(--overlay);
+
+  /* `border-base`, not `border` — `--color-border` would collide with the
+     `border` utility namespace and read as `border-border` at call sites. */
+  --color-border-base: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-neutral: var(--neutral);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    height: 100%;
+  }
+
+  body {
+    /* min-height, not height: with a fixed height the document cannot grow, so
+       anything past the first viewport becomes unreachable. */
+    min-height: 100%;
+    background-color: var(--bg);
+    color: var(--fg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* NOTE: no global `overflow: hidden` — it made every page unscrollable. */
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--border-strong);
+  }
+}
+
+@layer components {
+  /* Shared panel shell — replaces the repeated inline
+     rounded-xl + 1px border + box-shadow across Dashboard/VehiclePanel/etc. */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+    box-shadow: var(--panel-shadow);
+  }
+}
+
+@layer utilities {
+  .font-data {
+    font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  .pulse-dot {
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  .animate-fade-up {
+    animation: fadeSlideUp 0.25s ease-out forwards;
+  }
+
+  .glass {
+    background: var(--overlay);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/*
+ * Vehicle markers (MapLibre DOM markers).
+ * Colour and alert state are driven by [data-status] + --marker-color, which
+ * FleetMap mutates in place — so icons never go stale, and no <style> tag is
+ * injected on render.
+ */
+/*
+ * Do NOT set `position` here.
+ *
+ * MapLibre positions markers purely through `.maplibregl-marker { position:
+ * absolute }` — it never writes an inline position. This rule has the same
+ * specificity and is declared later, so `position: relative` silently won and
+ * dropped every marker into normal document flow: they stacked in an evenly
+ * spaced vertical column that ignored panning and zooming.
+ *
+ * The ping ring still anchors correctly, because MapLibre's `absolute` also
+ * makes this element a containing block for the ::after.
+ */
+.veh-marker {
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  background: var(--marker-color, #22d3ee);
+  border: 2px solid var(--marker-ring, var(--marker-color, #22d3ee));
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.35), 0 2px 6px rgb(0 0 0 / 0.4);
+  transition: transform 0.15s ease;
+}
+
+.veh-marker:hover {
+  transform: scale(1.15);
+}
+
+.veh-marker[data-selected="true"] {
+  transform: scale(1.2);
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    0 0 0 1px var(--marker-color);
+}
+
+.veh-marker[data-status="alert"]::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 2px solid var(--marker-color);
+  animation: ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ping {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.25;
+  }
+  50% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
